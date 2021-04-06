@@ -19,6 +19,7 @@ use App\Model\Entity\Task;
 use Cake\Core\Configure;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Response;
 use Cake\View\Exception\MissingTemplateException;
 use \App\Model\Table\TasksTable;
 
@@ -37,21 +38,22 @@ class PagesController extends AppController
 
     /**
      * isAuthorized method
-     * Права на просмотр и создание задач для всех пользователей
-     * Права на изменение записи - автор и исполнитель задачи
+     * Права на дашборд для всех авторизированных пользователей
      *
-     *
-     * @param $user
-     * @return bool
+     * @param array $user
+     * @return bool|Response
      */
-    public function isAuthorized($user)
+    public function isAuthorized(array $user)
     {
-        if($user['id']){
+        if(isset($user['id'])){
             return true;
         }
         return false;
     }
 
+    /**
+     * Action home - главная страница (Дашборд)
+     */
     public function home(){
 
         //ID авторизованного пользователя
