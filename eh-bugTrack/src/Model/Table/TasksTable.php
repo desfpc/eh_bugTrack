@@ -5,6 +5,7 @@ namespace App\Model\Table;
 
 use App\Model\Entity\Task;
 use Cake\Cache\Cache;
+use Cake\Event\Event;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -42,7 +43,14 @@ class TasksTable extends Table
         $this->belongsTo('Workers', ['foreignKey' => 'worker', 'className' => 'Users', 'propertyName' => 'worker']);
     }
 
-    public function afterSave($event, $entity, $options = [])
+    /**
+     * Действия после сохранения записи
+     *
+     * @param Event $event
+     * @param Task $entity
+     * @param array $options
+     */
+    public function afterSave(Event $event, Task $entity, $options = [])
     {
         //удваление кэшей
         Cache::delete('task_'.$entity->id, 'redis');
@@ -52,10 +60,10 @@ class TasksTable extends Table
     /**
      * Default validation rules.
      *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * @param Validator $validator Validator instance.
+     * @return Validator
      */
-    public function validationDefault(Validator $validator)
+    public function validationDefault(Validator $validator): Validator
     {
         $validator
             ->integer('id')
@@ -119,11 +127,11 @@ class TasksTable extends Table
     /**
      * Валидный статус
      *
-     * @param $value
+     * @param string $value
      * @param array $context
      * @return bool
      */
-    public function isValidStatus($value, array $context)
+    public function isValidStatus(string $value, array $context): bool
     {
         return key_exists($value, Task::getStatuses());
     }
@@ -131,11 +139,11 @@ class TasksTable extends Table
     /**
      * Валидный тип задачи
      *
-     * @param $value
+     * @param string $value
      * @param array $context
      * @return bool
      */
-    public function isValidType($value, array $context)
+    public function isValidType(string $value, array $context): bool
     {
         return key_exists($value, Task::getTypes());
     }

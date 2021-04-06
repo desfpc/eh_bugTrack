@@ -5,6 +5,7 @@ namespace App\Model\Entity;
 
 use Cake\Datasource\ConnectionManager;
 use Cake\ORM\Entity;
+use Exception;
 
 /**
  * Task Entity
@@ -29,25 +30,26 @@ class Task extends Entity
      * @param int $userId
      * @return bool
      */
-    public function mayEdit($userId){
+    public function mayEdit(int $userId):bool
+    {
 
         //можно изменять автору
         if(is_object($this->author)){
-            if($this->author->id == $userId){
+            if($this->author->id === $userId){
                 return true;
             }
         }
-        elseif($this->author == $userId){
+        elseif($this->author === $userId){
             return true;
         }
 
         //можно изменять исполнителю
         if(is_object($this->worker)){
-            if($this->worker->id == $userId){
+            if($this->worker->id === $userId){
                 return true;
             }
         }
-        elseif($this->worker == $userId){
+        elseif($this->worker === $userId){
             return true;
         }
 
@@ -61,15 +63,15 @@ class Task extends Entity
      * @param int $userId
      * @return bool
      */
-    public function mayDelete($userId){
+    public function mayDelete(int $userId): bool
+    {
 
         if(is_object($this->author)){
-            if($this->author->id == $userId){
+            if($this->author->id === $userId){
                 return true;
             }
-            return false;
         }
-        elseif($this->author == $userId){
+        elseif($this->author === $userId){
             return true;
         }
 
@@ -81,26 +83,8 @@ class Task extends Entity
      *
      * @return array
      */
-    public static function getTypes(){
-
-        //вывод полей из БД
-        /*$query = "SHOW COLUMNS FROM tasks WHERE field = 'bug_type'";
-
-        $db = ConnectionManager::get('default');
-        $results = $db->execute($query)->fetchAll('assoc');
-        if(count($results) > 0){
-            //формирование массива с данными
-            $enum = $results[0];
-            $enum = str_replace('enum(','',$enum);
-            $enum = str_replace(')','',$enum);
-            $enum = str_replace('\'','',$enum);
-            $arr = explode(',',$enum);
-
-            //назначение имен для отображения
-
-        }*/
-
-        //ручной вывод полей
+    public static function getTypes(): array
+    {
         return [
             'critical' => __('Critical Bug'),//'Срочный баг',
             'bug' => __('Minor Bug'),//'Несрочный баг',
@@ -111,10 +95,16 @@ class Task extends Entity
     /**
      * Virtual Field Имя типа бага ($task->type_name)
      *
-     * @return string|null
+     * @return string
+     * @throws Exception
      */
-    protected function _getTypeName(){
-        return __(Task::getTypes()[$this->bug_type]);
+    protected function _getTypeName(): string
+    {
+        if(!isset(Task::getTypes()[$this->bug_type])){
+            throw new Exception('No bug type name');
+        }
+
+        return Task::getTypes()[$this->bug_type];
     }
 
     /**
@@ -122,7 +112,8 @@ class Task extends Entity
      *
      * @return array
      */
-    public static function getStatuses(){
+    public static function getStatuses(): array
+    {
         return [
             'created' => __('Created'),//'Создана',
             'inwork' => __('In work'),//'В работе',
@@ -135,8 +126,15 @@ class Task extends Entity
      * Virtual Field Имя статуса ($task->status_name)
      *
      * @return string|null
+     * @throws Exception
      */
-    protected function _getStatusName(){
+    protected function _getStatusName(): string
+    {
+
+        if(!isset(Task::getStatuses()[$this->status])){
+            throw new Exception('No bug type name');
+        }
+
         return __(Task::getStatuses()[$this->status]);
     }
 
