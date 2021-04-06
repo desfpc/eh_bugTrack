@@ -3,14 +3,12 @@ declare(strict_types = 1);
 
 namespace App\Controller;
 
-use App\Controller\AppController;
 use App\Model\Entity\Task;
 use App\Model\Table\TasksTable;
 use App\Model\Table\UsersTable;
 use Cake\Cache\Cache;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Http\Response;
-use Cake\I18n\FrozenTime;
 use Cake\Mailer\Email;
 
 /**
@@ -196,10 +194,9 @@ class TasksController extends AppController
         if ($this->request->is('post')) {
 
             //заполняем параметры новой Task
-            $task = $this->Tasks->patchEntity($task, $this->request->getData());
+            $task = $this->Tasks->patchEntity($task, $this->request->getData(), ['associated' => []]);
             $task->author = $this->Auth->user('id'); //Автор - текущий пользователь
             $task->status = 'created';
-            $task->worker = Task::intOrNull($this->request->getData()['worker']);
 
             //сохранение задачи
             if ($this->Tasks->save($task)) {
@@ -254,8 +251,7 @@ class TasksController extends AppController
             $oldWorker = $task->worker;
 
             //заносим обновленные данные
-            $task = $this->Tasks->patchEntity($task, $this->request->getData());
-            $task->worker = Task::intOrNull($this->request->getData()['worker']);
+            $task = $this->Tasks->patchEntity($task, $this->request->getData(), ['associated' => []]);
 
             //сохранение изменений
             if ($this->Tasks->save($task)) {
@@ -267,9 +263,14 @@ class TasksController extends AppController
                 $sendNotice = false;
                 $to = [];
 
-                //если исполнитель не является автором или старый исполнитель поменялся
-                if (!is_null($task->worker) && $task->worker !== $task->author || ($oldWorker !== $task->worker && $oldWorker !== $task->author)){
+                //если исполнитель поменялся; или редактор - автор и есть исполнитель; или редактор не автор - нужно отослать уведомление
+                if (
+                    $oldWorker !== $task->worker ||
+                    ($this->Auth->user('id') === $task->author && !is_null($task->worker)) ||
+                    $this->Auth->user('id') !== $task->author
+                ) {
                     $sendNotice = true;
+
                     //если текущий пользователь - автор
                     if($this->Auth->user('id') === $task->author){
                         $to[] = $task->worker; //отсылаем исполнителю (изменил автор)
@@ -278,7 +279,9 @@ class TasksController extends AppController
                         $to[] = $task->author; //отсылаем автору (изменил исполнитель)
                     }
                     if($task->worker !== $oldWorker){
-                        $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже
+                        if(!in_array($oldWorker, $to)){
+                            $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже (если он не попал в список уведомления ранее)
+                        }
                     }
                 }
 
@@ -337,6 +340,7 @@ class TasksController extends AppController
 
                 return $this->redirect(['action' => 'view', $task->id]);
             }
+
             $this->Flash->error(__('The task could not be saved. Please, try again.'));
         }
         $this->set(compact('task', 'types', 'users', 'statuses'));

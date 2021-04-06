@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace App\Model\Entity;
 
-use Cake\Datasource\ConnectionManager;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 use Exception;
@@ -137,22 +136,6 @@ class Task extends Entity
         }
 
         return __(Task::getStatuses()[$this->status]);
-    }
-
-    /**
-     * Возвращает int или null (метод для предвалидации id исполнителя)
-     *
-     * @param string $value
-     * @return string|null
-     * @throws Exception
-     */
-    public static function intOrNull(string $value)
-    {
-        if($value === '' || $value === '0' || $value === 0) {
-            return null;
-        }
-
-        return $value;
     }
 
     /**

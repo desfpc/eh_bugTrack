@@ -8,8 +8,6 @@ use ArrayObject;
 use Cake\Cache\Cache;
 use Cake\Event\Event;
 use Cake\I18n\FrozenTime;
-use Cake\ORM\Query;
-use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -43,6 +41,20 @@ class TasksTable extends Table
 
         $this->belongsTo('Authors', ['foreignKey' => 'author', 'className' => 'Users', 'propertyName' => 'author']);
         $this->belongsTo('Workers', ['foreignKey' => 'worker', 'className' => 'Users', 'propertyName' => 'worker']);
+    }
+
+    /**
+     * Действия перед формированием Entity из $data
+     *
+     * @param Event $event
+     * @param ArrayObject $data
+     * @param ArrayObject $options
+     */
+    public function beforeMarshal(Event $event, ArrayObject $data, ArrayObject $options)
+    {
+        if(isset($data['worker']) && $data['worker'] === '0'){
+            $data['worker'] = '';
+        }
     }
 
     /**

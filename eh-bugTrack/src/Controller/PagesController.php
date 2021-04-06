@@ -16,12 +16,7 @@ declare(strict_types = 1);
 namespace App\Controller;
 
 use App\Model\Entity\Task;
-use Cake\Core\Configure;
-use Cake\Http\Exception\ForbiddenException;
-use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
-use Cake\View\Exception\MissingTemplateException;
-use \App\Model\Table\TasksTable;
 
 /**
  * Static content controller

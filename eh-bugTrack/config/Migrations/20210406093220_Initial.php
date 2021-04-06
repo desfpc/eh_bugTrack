@@ -1,4 +1,6 @@
 <?php
+declare(strict_types = 1);
+
 use Migrations\AbstractMigration;
 
 class Initial extends AbstractMigration
@@ -12,10 +14,11 @@ class Initial extends AbstractMigration
                 'limit' => 255,
                 'null' => false,
             ])
-            ->addColumn('status', 'string', [
+            ->addColumn('status', 'enum', [
                 'default' => null,
                 'limit' => null,
                 'null' => false,
+                'values' => ['created','inwork','completed','canceled'],
             ])
             ->addColumn('date_created', 'datetime', [
                 'default' => 'CURRENT_TIMESTAMP',
@@ -37,10 +40,11 @@ class Initial extends AbstractMigration
                 'limit' => null,
                 'null' => true,
             ])
-            ->addColumn('bug_type', 'string', [
+            ->addColumn('bug_type', 'enum', [
                 'default' => null,
                 'limit' => null,
                 'null' => false,
+                'values' => ['critical','bug','improvement'],
             ])
             ->addColumn('author', 'integer', [
                 'default' => null,
