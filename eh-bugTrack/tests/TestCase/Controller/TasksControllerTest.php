@@ -31,6 +31,7 @@ class TasksControllerTest extends TestCase
      * Test index method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testIndex()
     {
@@ -54,6 +55,7 @@ class TasksControllerTest extends TestCase
      * Test view method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testView()
     {
@@ -77,6 +79,7 @@ class TasksControllerTest extends TestCase
      * Test add method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testAdd()
     {
@@ -99,6 +102,7 @@ class TasksControllerTest extends TestCase
      * testEditWithWrongRights method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testEditWithWrongRights()
     {
@@ -119,6 +123,7 @@ class TasksControllerTest extends TestCase
      * test Edit method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testEdit()
     {
@@ -210,6 +215,7 @@ class TasksControllerTest extends TestCase
      * Test delete method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testDelete()
     {

@@ -10,7 +10,8 @@
         "cakephp/migrations": "^2.0.0",
         "cakephp/plugin-installer": "^1.0",
         "mobiledetect/mobiledetectlib": "2.*",
-        "holt59/cakephp3-bootstrap-helpers": "4.0.*"
+        "holt59/cakephp3-bootstrap-helpers": "4.0.*",
+        "ext-json": "*"
     },
     "require-dev": {
         "cakephp/bake": "^1.9.0",

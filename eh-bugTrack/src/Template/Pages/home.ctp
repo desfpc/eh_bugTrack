@@ -47,7 +47,7 @@ $filtersArr['type'] = '';
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($tasks as $task): ?>
+            <?php foreach ($tasks as $task) { ?>
                 <tr>
                     <td><?= $this->Number->format($task->id) ?></td>
                     <td><?= $this->Html->link($task->name, ['controller' => 'tasks', 'action' => 'view', $task->id]) ?></td>
@@ -62,7 +62,7 @@ $filtersArr['type'] = '';
                         <?= $task->mayDelete($uid) ? $this->Form->postLink(__('Delete'), ['controller' => 'tasks', 'action' => 'delete', $task->id], ['confirm' => __('Are you sure you want to delete # {0}?', $task->id)]) : '' ?>
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php } ?>
             </tbody>
         </table>
         <hr />
@@ -82,7 +82,7 @@ $filtersArr['type'] = '';
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($createdTasks as $task): ?>
+            <?php foreach ($createdTasks as $task) { ?>
                 <tr>
                     <td><?= $this->Number->format($task->id) ?></td>
                     <td><?= $this->Html->link($task->name, ['controller' => 'tasks', 'action' => 'view', $task->id]) ?></td>
@@ -97,7 +97,7 @@ $filtersArr['type'] = '';
                         <?= $task->mayDelete($uid) ? $this->Form->postLink(__('Delete'), ['controller' => 'tasks', 'action' => 'delete', $task->id], ['confirm' => __('Are you sure you want to delete # {0}?', $task->id)]) : '' ?>
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php } ?>
             </tbody>
         </table>
     </div>

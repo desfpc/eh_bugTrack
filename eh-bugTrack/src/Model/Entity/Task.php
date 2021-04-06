@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace App\Model\Entity;
 
 use Cake\Datasource\ConnectionManager;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Entity;
 use Exception;
 
@@ -13,8 +14,8 @@ use Exception;
  * @property int $id
  * @property string $name
  * @property string $status
- * @property \Cake\I18n\FrozenTime $date_created
- * @property \Cake\I18n\FrozenTime|null $date_updated
+ * @property FrozenTime $date_created
+ * @property FrozenTime|null $date_updated
  * @property string|null $content
  * @property string|null $comment
  * @property string $bug_type
@@ -136,6 +137,22 @@ class Task extends Entity
         }
 
         return __(Task::getStatuses()[$this->status]);
+    }
+
+    /**
+     * Возвращает int или null (метод для предвалидации id исполнителя)
+     *
+     * @param string $value
+     * @return string|null
+     * @throws Exception
+     */
+    public static function intOrNull(string $value)
+    {
+        if($value === '' || $value === '0' || $value === 0) {
+            return null;
+        }
+
+        return $value;
     }
 
     /**

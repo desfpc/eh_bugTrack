@@ -55,7 +55,7 @@ if(!isset($containerClass)){
                 ['fixed' => 'top',
                 'theme' => 'dark',
                 'src' => '/img/beetle.svg']) ?>
-        <?php if($authUserID): ?>
+        <?php if($authUserID) { ?>
             <?= $this->Navbar->beginMenu() ?>
             <?= $this->Navbar->link('Задачи', '/tasks') ?>
             <?= $this->Navbar->link('Пользователи', '/users') ?>
@@ -74,7 +74,7 @@ if(!isset($containerClass)){
                     "action" => "logout",]),
                 ['class' => 'btn btn-link']) ?>
 
-        <?php endif; ?>
+        <?php } ?>
         <?= $this->Navbar->end() ?>
         <div class="container-fluid container-main <?=$containerClass?>">
             <?= $this->Flash->render() ?>

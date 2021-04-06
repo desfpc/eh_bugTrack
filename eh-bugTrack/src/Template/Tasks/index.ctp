@@ -56,7 +56,7 @@ foreach ($filters as $filter) {
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($tasks as $task): ?>
+            <?php foreach ($tasks as $task) { ?>
                 <tr>
                     <td><?= $this->Number->format($task->id) ?></td>
                     <td><?= $this->Html->link($task->name, ['action' => 'view', $task->id]) ?></td>
@@ -71,7 +71,7 @@ foreach ($filters as $filter) {
                         <?= $task->mayDelete($uid) ? $this->Form->postLink(__('Delete'), ['action' => 'delete', $task->id], ['confirm' => __('Are you sure you want to delete # {0}?', $task->id)]) : '' ?>
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php } ?>
             </tbody>
         </table>
         <div class="paginator">

@@ -5,15 +5,19 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use App\Model\Entity\Task;
+use App\Model\Table\TasksTable;
+use App\Model\Table\UsersTable;
 use Cake\Cache\Cache;
+use Cake\Datasource\Exception\RecordNotFoundException;
+use Cake\Http\Response;
 use Cake\I18n\FrozenTime;
 use Cake\Mailer\Email;
 
 /**
  * Tasks Controller
  *
- * @property \App\Model\Table\TasksTable $Tasks
- * @property \App\Model\Table\UsersTable $Users
+ * @property TasksTable $Tasks
+ * @property UsersTable $Users
  *
  * @method \App\Model\Entity\Task[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
@@ -21,8 +25,6 @@ class TasksController extends AppController
 {
     /**
      * Настройки пейджинации по-умолчанию
-     *
-     * @var array
      */
     public $paginate = [
         'limit' => 10,
@@ -39,10 +41,10 @@ class TasksController extends AppController
      * Право на удаление задачи - автор
      *
      *
-     * @param $user
-     * @return bool
+     * @param array $user
+     * @return bool|Response
      */
-    public function isAuthorized($user)
+    public function isAuthorized(array $user)
     {
 
         if(!$user['id']) {
@@ -85,7 +87,7 @@ class TasksController extends AppController
     /**
      * Index method
      *
-     * @return \Cake\Http\Response|null
+     * @return Response|null
      */
     public function index()
     {
@@ -139,8 +141,8 @@ class TasksController extends AppController
      * View method
      *
      * @param string|null $id Task id.
-     * @return \Cake\Http\Response|null
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     * @return Response|null
+     * @throws RecordNotFoundException When record not found.
      */
     public function view($id = null)
     {
@@ -154,8 +156,10 @@ class TasksController extends AppController
         //Типы задач
         $types = Task::getTypes();
 
+        //Читаем задачу из кэша
         $task = Cache::read('task_view_'.$id, 'redis');
         if ($task === false) {
+            //Если нет кэша - берем из БД и сохраняем в кэш
             $task = $this->Tasks->get($id, [
                 'contain' => [],
             ]);
@@ -166,8 +170,6 @@ class TasksController extends AppController
             'contain' => ['Authors','Workers'],
         ]);
 
-        //$this->set('task', $task);
-
         $this->set(compact('task', 'types', 'statuses', 'uid'));
 
     }
@@ -175,12 +177,10 @@ class TasksController extends AppController
     /**
      * Add method
      *
-     * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
+     * @return Response|null Redirects on successful add, renders view otherwise.
      */
     public function add()
     {
-        //Статусы задач - не используем на форме создания
-        //$statuses = Task::getStatuses();
 
         //Пользователи
         $this->loadModel('Users');
@@ -195,25 +195,16 @@ class TasksController extends AppController
         $task = $this->Tasks->newEntity();
         if ($this->request->is('post')) {
 
-            //данные POST запроса
-            $postData = $this->request->getData();
-
-            //предвалидация worker
-            if($postData['worker'] == '' || $postData['worker'] == '0'){
-                $postData['worker'] = null;
-            }
-            else {
-                $postData['worker'] = (int)$postData['worker'];
-            }
-
-            $task = $this->Tasks->patchEntity($task, $postData);
+            //заполняем параметры новой Task
+            $task = $this->Tasks->patchEntity($task, $this->request->getData());
             $task->author = $this->Auth->user('id'); //Автор - текущий пользователь
-            $task->status = 'created'; //создаем задачу со статусом created
-            $task->worker = $postData['worker'];
+            $task->status = 'created';
+            $task->worker = Task::intOrNull($this->request->getData()['worker']);
+
+            //сохранение задачи
             if ($this->Tasks->save($task)) {
 
-                $this->log(json_encode(['action' => 'Added New Task', 'data' => $postData]), 'debug');
-
+                $this->log(json_encode(['action' => 'Added New Task', 'data' => $this->request->getData()]), 'debug');
                 $this->Flash->success(__('The task has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
@@ -227,8 +218,8 @@ class TasksController extends AppController
      * Edit method
      *
      * @param string|null $id Task id.
-     * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     * @return Response|null Redirects on successful edit, renders view otherwise.
+     * @throws RecordNotFoundException When record not found.
      */
     public function edit($id = null)
     {
@@ -246,8 +237,10 @@ class TasksController extends AppController
         //Типы задач
         $types = Task::getTypes();
 
+        //читаем задачу из кэша
         $task = Cache::read('task_'.$id, 'redis');
         if ($task === false) {
+            //если нет в кэше задачи, получаем ее из БД и заносим в кэш
             $task = $this->Tasks->get($id, [
                 'contain' => [],
             ]);
@@ -260,23 +253,14 @@ class TasksController extends AppController
             //старые данные для отсылки уведомлений
             $oldWorker = $task->worker;
 
-            //данные POST запроса
-            $postData = $this->request->getData();
+            //заносим обновленные данные
+            $task = $this->Tasks->patchEntity($task, $this->request->getData());
+            $task->worker = Task::intOrNull($this->request->getData()['worker']);
 
-            //предвалидация worker
-            if($postData['worker'] == '' || $postData['worker'] == '0'){
-                $postData['worker'] = null;
-            }
-            else {
-                $postData['worker'] = (int)$postData['worker'];
-            }
-
-            $task = $this->Tasks->patchEntity($task, $postData);
-            $task->worker = $postData['worker'];
-            $task->date_updated = FrozenTime::now();
+            //сохранение изменений
             if ($this->Tasks->save($task)) {
 
-                $this->log(json_encode(['action' => 'Edited Task', 'data' => $postData]), 'debug');
+                $this->log(json_encode(['action' => 'Edited Task', 'data' => $this->request->getData()]), 'debug');
                 $this->Flash->success(__('The task has been saved.'));
 
                 //проверка на необходимость отсылки уведомления
@@ -284,22 +268,23 @@ class TasksController extends AppController
                 $to = [];
 
                 //если исполнитель не является автором или старый исполнитель поменялся
-                if (!is_null($task->worker) && $task->worker != $task->author || ($oldWorker != $task->worker && $oldWorker != $task->author)){
+                if (!is_null($task->worker) && $task->worker !== $task->author || ($oldWorker !== $task->worker && $oldWorker !== $task->author)){
                     $sendNotice = true;
                     //если текущий пользователь - автор
-                    if($this->Auth->user('id') == $task->author){
+                    if($this->Auth->user('id') === $task->author){
                         $to[] = $task->worker; //отсылаем исполнителю (изменил автор)
                     }
                     else {
                         $to[] = $task->author; //отсылаем автору (изменил исполнитель)
                     }
-                    if($task->worker != $oldWorker){
+                    if($task->worker !== $oldWorker){
                         $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже
                     }
                 }
 
                 if($sendNotice){
 
+                    //Тело письма TODO вынести в шаблон
                     $message = '
                     <h1>Changed Bug №'.$task->id.'</h1>
                     <hr>
@@ -361,8 +346,8 @@ class TasksController extends AppController
      * Delete method
      *
      * @param string|null $id Task id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     * @return Response|null Redirects to index.
+     * @throws RecordNotFoundException When record not found.
      */
     public function delete($id = null)
     {

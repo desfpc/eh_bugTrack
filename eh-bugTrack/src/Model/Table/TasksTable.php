@@ -4,8 +4,10 @@ declare(strict_types = 1);
 namespace App\Model\Table;
 
 use App\Model\Entity\Task;
+use ArrayObject;
 use Cake\Cache\Cache;
 use Cake\Event\Event;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -41,6 +43,18 @@ class TasksTable extends Table
 
         $this->belongsTo('Authors', ['foreignKey' => 'author', 'className' => 'Users', 'propertyName' => 'author']);
         $this->belongsTo('Workers', ['foreignKey' => 'worker', 'className' => 'Users', 'propertyName' => 'worker']);
+    }
+
+    /**
+     * Действия перед сохранением записи
+     *
+     * @param Event $event
+     * @param Task $entity
+     * @param array $options
+     */
+    public function beforeSave(Event $event, Task $entity, $options = [])
+    {
+        $entity->date_updated = FrozenTime::now();
     }
 
     /**

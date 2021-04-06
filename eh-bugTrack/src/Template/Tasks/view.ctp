@@ -20,7 +20,7 @@ $this->Breadcrumbs->add(
 ?>
 <?= $this->Breadcrumbs->render() ?>
 <h1><?= $task->name ?></h1>
-<?php if($task->mayEdit($uid)): ?>
+<?php if($task->mayEdit($uid)) { ?>
     <?= $this->Html->link(
         'Изменить задачу',
         $this->Url->build([
@@ -29,7 +29,7 @@ $this->Breadcrumbs->add(
             $task->id]),
         ['class' => 'btn btn-success btn-block']) ?>
 <hr/>
-<?php endif; ?>
+<?php } ?>
 <div class="row">
     <div class="col-sm-12">
         <table class="vertical-table table table-dark">

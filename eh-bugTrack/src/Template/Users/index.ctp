@@ -36,7 +36,7 @@ $this->Breadcrumbs->add(
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($users as $user): ?>
+            <?php foreach ($users as $user) { ?>
                 <tr>
                     <td><?= $this->Number->format($user->id) ?></td>
                     <td><?= h($user->name) ?></td>
@@ -47,7 +47,7 @@ $this->Breadcrumbs->add(
                         <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $user->id], ['confirm' => __('Are you sure you want to delete # {0}?', $user->id)]) ?>
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php } ?>
             </tbody>
         </table>
         <div class="paginator">

@@ -83,6 +83,7 @@ class UsersControllerTest extends TestCase
      * Test index method
      *
      * @return void
+     * @throws \PHPUnit\Exception
      */
     public function testIndex()
     {
