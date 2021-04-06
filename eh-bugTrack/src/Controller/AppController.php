@@ -18,6 +18,8 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\Event;
+use Cake\Http\Response;
+use Exception;
 
 /**
  * Application Controller
@@ -34,7 +36,7 @@ class AppController extends Controller
      * Initialization hook method.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize()
     {
@@ -60,16 +62,13 @@ class AppController extends Controller
             ],
             'unauthorizedRedirect' => $this->referer() // Если не авторизованы, то возвращаем на страницу, где только что были
         ]);
-
-        // Разрешение экшена display, чтобы наш контроллер pages продолжал работать.
-        //$this->Auth->allow(['display']);
     }
 
     /**
-     * @param $user
-     * @return false
+     * @param array $user
+     * @return bool|Response
      */
-    public function isAuthorized($user)
+    public function isAuthorized(array $user)
     {
         return false;
     }
