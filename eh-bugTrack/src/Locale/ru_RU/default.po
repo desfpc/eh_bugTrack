@@ -1,0 +1,104 @@
+msgid "Critical Bug"
+msgstr "Срочный баг"
+
+msgid "Minor Bug"
+msgstr "Несрочный баг"
+
+msgid "Minor Improvement"
+msgstr "Незначительное улучшение"
+
+msgid "Created"
+msgstr "Создана"
+
+msgid "In work"
+msgstr "В работе"
+
+msgid "Completed"
+msgstr "Выполнена"
+
+msgid "Canceled"
+msgstr "Отменена"
+
+msgid "The task has been saved."
+msgstr "Задача успешно сохранена"
+
+msgid "The task could not be saved. Please, try again."
+msgstr "Не удалось сохранить задачу. Пожалуйста, попробуйте еще раз."
+
+msgid "The task has been deleted."
+msgstr "Задача успешно удалена"
+
+msgid "The task could not be deleted. Please, try again."
+msgstr "Не удалось удалить задачу. Пожалуйста, попробуйте еще раз."
+
+msgid "View"
+msgstr "Смотреть"
+
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Are you sure you want to delete # {0}?"
+msgstr "Вы уверены, что хотите удалить задачу # {0}?"
+
+msgid "Edit Task"
+msgstr "Изменение задачи"
+
+msgid "Add Task"
+msgstr "Создать задачу"
+
+msgid "Name"
+msgstr "Наименование"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Content"
+msgstr "Описание"
+
+msgid "Comment"
+msgstr "Комментарий"
+
+msgid "Bug Type"
+msgstr "Тип задачи"
+
+msgid "Worker"
+msgstr "Исполнитель"
+
+msgid "Submit"
+msgstr "Отправить"
+
+msgid "Date Created"
+msgstr "Дата создания"
+
+msgid "Date Updated"
+msgstr "Дата изменения"
+
+msgid "Author"
+msgstr "Автор"
+
+msgid "Add User"
+msgstr "Создать пользователя"
+
+msgid "Login"
+msgstr "Логин"
+
+msgid "Pass"
+msgstr "Пароль"
+
+msgid "You are not authorized to access that location."
+msgstr "Вы не авторизованы для доступа к этому ресурсу"
+
+msgid "The provided value is invalid"
+msgstr "Указанное значение не допустимо"
+
+msgid "You need to provide a valid status"
+msgstr "Нужно указать верный статус"
+
+msgid "You need to provide a valid bug type"
+msgstr "Нужно указать верный тип задачи"
+
+msgid "Invalid email"
+msgstr "Не верный E-mail"
