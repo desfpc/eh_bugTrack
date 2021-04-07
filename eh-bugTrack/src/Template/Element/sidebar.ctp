@@ -31,18 +31,18 @@ declare(strict_types = 1);
     </div>
     <label class="label-menu" for="status-control">Статус:</label>
     <select class="form-control task-control" id="status">
-        <option value="" <?= $status == '' ? 'selected' : '' ?>>
+        <option value="" <?= $status === '' ? 'selected' : '' ?>>
             Все
         </option>
-        <?php foreach ($statuses as $key => $value): ?>
+        <?php foreach ($statuses as $key => $value) { ?>
             <option value="<?= $key ?>" <?= $status == $key ? 'selected' : '' ?>>
                 <?= __($value) ?>
             </option>
-        <?php endforeach; ?>
+        <?php } ?>
     </select>
     <label class="label-menu" for="status-control">Тип бага:</label>
     <select class="form-control task-control" id="type">
-        <option value="" <?= $type == '' ? 'selected' : '' ?>>
+        <option value="" <?= $type === '' ? 'selected' : '' ?>>
             Все
         </option>
         <?php foreach ($types as $key => $value): ?>
