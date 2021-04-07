@@ -9,6 +9,7 @@ declare(strict_types = 1);
  * @var array $types //массив со списком типов задач
  * @var string $status //выбранный статус задачи
  * @var string $type //выбранный тип задачи
+ * @var array $filters //массив с названиями фильтров
  */
 
 //хлебные крошки
@@ -21,7 +22,6 @@ $this->Breadcrumbs->add(
 
 //выбранные фильтры задач - формирование ссылки
 $filtersArr = [];
-$filters = ['status','type'];
 
 foreach ($filters as $filter) {
     if($$filter != ''){

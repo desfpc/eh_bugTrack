@@ -20,13 +20,13 @@ declare(strict_types = 1);
         ['class' => 'btn btn-success btn-block']) ?>
     <div class="list-group list-group-tasks">
         <?= $this->Html->link('Все',
-            ['controller' => 'tasks', 'action' => 'index', '?' => $filtersArr],
+            ['controller' => 'tasks', 'action' => 'index', '?' => array_merge($filtersArr, ['owner' => 'all'])],
             ['class' => 'list-group-item list-group-item-action list-group-item-dark' . ($owner == '' ? ' active' : '')]) ?>
         <?= $this->Html->link('Созданные',
-            ['controller' => 'tasks', 'action' => 'index', '?' => array_merge(['owner' => 'author'], $filtersArr)],
+            ['controller' => 'tasks', 'action' => 'index', '?' => array_merge($filtersArr, ['owner' => 'author'])],
             ['class' => 'list-group-item list-group-item-action list-group-item-dark' . ($owner == 'author' ? ' active' : '')]) ?>
         <?= $this->Html->link('Назначенные',
-            ['controller' => 'tasks', 'action' => 'index', '?' => array_merge(['owner' => 'worker'], $filtersArr)],
+            ['controller' => 'tasks', 'action' => 'index', '?' => array_merge($filtersArr, ['owner' => 'worker'])],
             ['class' => 'list-group-item list-group-item-action list-group-item-dark' . ($owner == 'worker' ? ' active' : '')]) ?>
     </div>
     <label class="label-menu" for="status-control">Статус:</label>

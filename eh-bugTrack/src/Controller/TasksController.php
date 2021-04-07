@@ -10,6 +10,7 @@ use Cake\Cache\Cache;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Http\Response;
 use Cake\Mailer\Email;
+use Cake\Routing\Router;
 
 /**
  * Tasks Controller
@@ -90,6 +91,46 @@ class TasksController extends AppController
     public function index()
     {
 
+        //фильтры и сортировки таблицы
+        $filters = ['owner','status','type','sort','direction'];
+
+        //параметры запроса
+        $params = $this->request->getQueryParams();
+
+        //проверка на наличие фильтра в запросе
+        $noFilters = true;
+        foreach ($filters as $filter) {
+            if(isset($params[$filter])) {
+                $noFilters = false;
+            }
+            else {
+                $params[$filter] = '';
+            }
+        }
+
+        //вытаскиваем фильтры из сессии
+        if($noFilters && isset($_SESSION['filters'])) {
+
+            $doRedirect = false;
+
+            foreach ($_SESSION['filters'] as $key => $value) {
+                if($value != ''){
+                    $params[$key] = $value;
+                    $doRedirect = true;
+                }
+            }
+
+            //редирект, что бы в строке запроса были нужные фильтры и верно отработал paginate
+            if($doRedirect){
+                $url = Router::url([
+                    "controller" => "Tasks",
+                    "action" => "index",
+                    "?" => $params]);
+                $this->redirect($url);
+            }
+
+        }
+
         //ID авторизованного пользователя
         $uid = $this->Auth->user('id');
 
@@ -103,18 +144,22 @@ class TasksController extends AppController
         $owners = ['author','worker'];
 
         //получение параметров для фильтра списка задач
-        $type = $this->request->getQuery('type'); //тип бага
-        if(!key_exists($type, $types)){
+        $type = $params['type']; //тип бага
+        if($type !== '' && !key_exists($type, $types)){
             $type = '';
         }
-        $status = $this->request->getQuery('status'); //статус бага
-        if(!key_exists($status, $statuses)){
+
+        $status = $params['status']; //статус бага
+        if($status !== '' && !key_exists($status, $statuses)){
             $status = '';
         }
-        $owner = $this->request->getQuery('owner'); //задача по отношению к пользователю (all, author, worker)
-        if(!in_array($owner, $owners)){
+        $owner = $params['owner']; //задача по отношению к пользователю (all, author, worker)
+        if($owner !== '' && !in_array($owner, $owners)){
             $owner = '';
         }
+
+        $sort = $params['sort']; //сортировка
+        $direction = $params['direction']; //направление сортировки
 
         //список conditions для формирования списка задач
         if($type != ''){
@@ -130,8 +175,11 @@ class TasksController extends AppController
         //получение списка задач
         $tasks = $this->paginate($this->Tasks->find('all')->contain(['Authors','Workers']));
 
+        //сохраняем значения фильтров и сортировок в сессию
+        $_SESSION['filters'] = $params;
+
         //передаем переменные в view
-        $this->set(compact('tasks','uid', 'owner', 'statuses', 'types', 'status', 'type'));
+        $this->set(compact('tasks','uid', 'owner', 'statuses', 'types', 'status', 'type','sort','direction','filters'));
 
     }
 
