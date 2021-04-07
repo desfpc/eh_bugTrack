@@ -55,6 +55,9 @@ msgstr "Наименование"
 msgid "Status"
 msgstr "Статус"
 
+msgid "Type"
+msgstr "Тип"
+
 msgid "Content"
 msgstr "Описание"
 

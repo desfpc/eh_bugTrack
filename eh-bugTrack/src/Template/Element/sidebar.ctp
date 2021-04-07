@@ -29,26 +29,14 @@ declare(strict_types = 1);
             ['controller' => 'tasks', 'action' => 'index', '?' => array_merge($filtersArr, ['owner' => 'worker'])],
             ['class' => 'list-group-item list-group-item-action list-group-item-dark' . ($owner == 'worker' ? ' active' : '')]) ?>
     </div>
-    <label class="label-menu" for="status-control">Статус:</label>
-    <select class="form-control task-control" id="status">
-        <option value="" <?= $status === '' ? 'selected' : '' ?>>
-            Все
-        </option>
-        <?php foreach ($statuses as $key => $value) { ?>
-            <option value="<?= $key ?>" <?= $status == $key ? 'selected' : '' ?>>
-                <?= __($value) ?>
-            </option>
-        <?php } ?>
-    </select>
-    <label class="label-menu" for="status-control">Тип бага:</label>
-    <select class="form-control task-control" id="type">
-        <option value="" <?= $type === '' ? 'selected' : '' ?>>
-            Все
-        </option>
-        <?php foreach ($types as $key => $value): ?>
-            <option value="<?= $key ?>" <?= $type == $key ? 'selected' : '' ?>>
-                <?= __($value) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <?= $this->Form->control('status', [
+        'options' => array_merge(['' => 'Все'],$statuses),
+        'class' => 'form-control task-control',
+        'default' => $status
+    ]); ?>
+    <?= $this->Form->control('type', [
+        'options' => array_merge(['' => 'Все'],$types),
+        'class' => 'form-control task-control',
+        'default' => $type
+    ]); ?>
 </div>

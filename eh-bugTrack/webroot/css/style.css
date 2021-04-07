@@ -75,6 +75,7 @@ h1 {
 }
 .list-group-tasks {
     margin-top: 10px;
+    margin-bottom: 20px;
 }
 .table-dark a {
     color: #5aaaff;
