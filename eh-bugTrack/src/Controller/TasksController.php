@@ -204,6 +204,9 @@ class TasksController extends AppController
                 $this->log(json_encode(['action' => 'Added New Task', 'data' => $this->request->getData()]), 'debug');
                 $this->Flash->success(__('The task has been saved.'));
 
+                //отправляем уведомление
+                $this->sendBugEmail(null, $task);
+
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('The task could not be saved. Please, try again.'));
@@ -259,84 +262,8 @@ class TasksController extends AppController
                 $this->log(json_encode(['action' => 'Edited Task', 'data' => $this->request->getData()]), 'debug');
                 $this->Flash->success(__('The task has been saved.'));
 
-                //проверка на необходимость отсылки уведомления
-                $sendNotice = false;
-                $to = [];
-
-                //если исполнитель поменялся; или редактор - автор и есть исполнитель; или редактор не автор - нужно отослать уведомление
-                if (
-                    $oldWorker !== $task->worker ||
-                    ($this->Auth->user('id') === $task->author && !is_null($task->worker)) ||
-                    $this->Auth->user('id') !== $task->author
-                ) {
-                    $sendNotice = true;
-
-                    //если текущий пользователь - автор
-                    if($this->Auth->user('id') === $task->author){
-                        $to[] = $task->worker; //отсылаем исполнителю (изменил автор)
-                    }
-                    else {
-                        $to[] = $task->author; //отсылаем автору (изменил исполнитель)
-                    }
-                    if($task->worker !== $oldWorker){
-                        if(!in_array($oldWorker, $to)){
-                            $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже (если он не попал в список уведомления ранее)
-                        }
-                    }
-                }
-
-                if($sendNotice){
-
-                    //Тело письма TODO вынести в шаблон
-                    $message = '
-                    <h1>Changed Bug №'.$task->id.'</h1>
-                    <hr>
-                    <table>
-                        <tr>
-                            <th>Наименование: </th>
-                            <td>'.h($task->name).'</td>
-                            <th>Тип задачи: </th>
-                            <td>'.$task->type_name.'</td>
-                            <th>Статус: </th>
-                            <td>'.$task->status_name.'</td>
-                        </tr>
-                    </table>
-                    <table>
-                        <tr>
-                            <th>Описание</th>
-                        </tr>
-                        <tr>
-                            <td>'.h($task->content).'</td>
-                        </tr>
-                        <tr>
-                            <th>Комментариц</th>
-                        </tr>
-                        <tr>
-                            <td>'.h($task->comment).'</td>
-                        </tr>
-                    </table>';
-
-
-                    if(is_array($to) && count($to) > 0){
-                        foreach ($to as $id){
-                            if(!is_null($id)){
-                                $user = $this->Users->get($id, [
-                                    'contain' => [],
-                                ]);
-
-                                if(isset($user->login) && $user->login != ''){
-                                    //отсылаем уведомление
-                                    $email = new Email('default');
-                                    $email->setFrom(['peshalov.sergey@yandex.ru' => 'EH BugTracker'])
-                                        ->setTo($user->login, $user->name)
-                                        ->setSubject('Changed Bug №'.$task->id.': '.h($task->name).' - '.$task->status_name)
-                                        ->send($message);
-                                }
-                            }
-                        }
-                    }
-                }
-
+                //отправляем уведомление
+                $this->sendBugEmail($oldWorker, $task);
 
                 return $this->redirect(['action' => 'view', $task->id]);
             }
@@ -364,5 +291,70 @@ class TasksController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Отсылка уведомления об изменении задачи (бага) TODO протестировать отсылку с email шаблоном
+     *
+     * @param null|int $oldWorker
+     * @param Task $task
+     * @return bool
+     */
+    private function sendBugEmail($oldWorker, Task $task): bool
+    {
+        //проверка на необходимость отсылки уведомления
+        $sendNotice = false;
+        $to = [];
+
+        //если исполнитель поменялся; или редактор - автор и есть исполнитель; или редактор не автор - нужно отослать уведомление
+        if (
+            $oldWorker !== $task->worker ||
+            ($this->Auth->user('id') === $task->author && !is_null($task->worker)) ||
+            $this->Auth->user('id') !== $task->author
+        ) {
+            $sendNotice = true;
+
+            //если текущий пользователь - автор
+            if(!is_null($task->worker) && $this->Auth->user('id') === $task->author){
+                $to[] = $task->worker; //отсылаем исполнителю (изменил автор)
+            }
+            elseif(!is_null($task->worker)) {
+                $to[] = $task->author; //отсылаем автору (изменил исполнитель)
+            }
+            if(!is_null($oldWorker) && $task->worker !== $oldWorker){
+                if(!in_array($oldWorker, $to)){
+                    $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже (если он не попал в список уведомления ранее)
+                }
+            }
+        }
+
+        if($sendNotice){
+
+            //отсылка уведомлений всем нуждающимся
+            if(is_array($to) && count($to) > 0){
+                foreach ($to as $id){
+                    if(!is_null($id)){
+                        $user = $this->Users->get($id, [
+                            'contain' => [],
+                        ]);
+
+                        if(isset($user->login) && $user->login != ''){
+                            //отсылаем уведомление
+                            $email = new Email('default');
+                            $email->setFrom(['peshalov.sergey@yandex.ru' => 'EH BugTracker'])
+                                ->setTo($user->login, $user->name)
+                                ->setSubject('Changed Bug №'.$task->id.': '.h($task->name).' - '.$task->status_name)
+                                ->setEmailFormat('html')
+                                ->viewBuilder()->setTemplate('bug_changed');
+                            $email->setViewVars(['task' => $task])
+                                ->send();
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+
     }
 }
