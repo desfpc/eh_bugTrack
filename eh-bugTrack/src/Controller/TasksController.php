@@ -207,14 +207,14 @@ class TasksController extends AppController
         if ($task === false) {
             //Если нет кэша - берем из БД и сохраняем в кэш
             $task = $this->Tasks->get($id, [
-                'contain' => [],
+                'contain' => ['Authors','Workers'],
             ]);
             Cache::write('task_view_'.$id, $task, 'redis');
         }
 
-        $task = $this->Tasks->get($id, [
+        /*$task = $this->Tasks->get($id, [
             'contain' => ['Authors','Workers'],
-        ]);
+        ]);*/
 
         $this->set(compact('task', 'types', 'statuses', 'uid'));
 
@@ -240,6 +240,8 @@ class TasksController extends AppController
 
         $task = $this->Tasks->newEntity();
         if ($this->request->is('post')) {
+
+            //TODO patchEntity обработка REQUEST
 
             //заполняем параметры новой Task
             $task = $this->Tasks->patchEntity($task, $this->request->getData(), ['associated' => []]);
@@ -351,32 +353,23 @@ class TasksController extends AppController
     private function sendBugEmail($oldWorker, Task $task): bool
     {
         //проверка на необходимость отсылки уведомления
-        $sendNotice = false;
         $to = [];
 
-        //если исполнитель поменялся; или редактор - автор и есть исполнитель; или редактор не автор - нужно отослать уведомление
-        if (
-            $oldWorker !== $task->worker ||
-            ($this->Auth->user('id') === $task->author && !is_null($task->worker)) ||
-            $this->Auth->user('id') !== $task->author
-        ) {
-            $sendNotice = true;
-
-            //если текущий пользователь - автор
-            if(!is_null($task->worker) && $this->Auth->user('id') === $task->author){
-                $to[] = $task->worker; //отсылаем исполнителю (изменил автор)
-            }
-            elseif(!is_null($task->worker)) {
-                $to[] = $task->author; //отсылаем автору (изменил исполнитель)
-            }
-            if(!is_null($oldWorker) && $task->worker !== $oldWorker){
-                if(!in_array($oldWorker, $to)){
-                    $to[] = $oldWorker; //отсылаем предыдущему исполнителю тоже (если он не попал в список уведомления ранее)
-                }
-            }
+        //Определяем, кому делать рассылку уведомления TODO написать тесты
+        //если задачу изменил не автор
+        if($task->author !== $this->Auth->user('id')) {
+            $to[] = $task->author;
+        }
+        //если задачу изменил не исполнитель
+        if(!is_null($task->worker) && $task->worker !== $this->Auth->user('id') && !in_array($task->worker, $to)) {
+            $to[] = $task->worker;
+        }
+        //если исполнитель поменялся и старый исполнитель не менял задачу
+        if(!is_null($oldWorker) && $oldWorker !== $this->Auth->user('id') && !in_array($oldWorker, $to)) {
+            $to[] = $oldWorker;
         }
 
-        if($sendNotice){
+        if(count($to) > 0){
 
             //отсылка уведомлений всем нуждающимся
             if(is_array($to) && count($to) > 0){
