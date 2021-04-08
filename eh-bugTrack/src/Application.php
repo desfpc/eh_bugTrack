@@ -54,6 +54,7 @@ class Application extends BaseApplication
 
         // Load more plugins here
         $this->addPlugin('Bootstrap');
+        $this->addPlugin('Cake/ElasticSearch', ['bootstrap' => true]);
     }
 
     /**
