@@ -100,7 +100,7 @@ class TasksController extends AppController
         //проверка на наличие фильтра в запросе
         $noFilters = true;
         foreach ($filters as $filter) {
-            if(isset($params[$filter])) {
+            if(key_exists($filter, $params)) {
                 $noFilters = false;
             }
             else {
